@@ -32,14 +32,14 @@ func main() {
 	db := utils.NewDbConnection(cfg)
 	rdb := utils.NewRedisConnection(cfg)
 	gateWays := map[string]gateways.PaymentGateway{
-		"a": gateways.NewGateWayA("http://gateway.com", "/withdraw", "/deposit", "http://localhost:8080/callback"),
-		"b": gateways.NewGateWayB("http://gatewayb.com", "http://localhost:8080/callback"),
+		"a": gateways.NewGateWayA(cfg.Network.GateWayAUrl, "/withdraw", "/deposit", cfg.Network.CallbackPrefix),
+		"b": gateways.NewGateWayB(cfg.Network.GateWayBUrl, cfg.Network.CallbackPrefix),
 	}
 
 	processor := payment_processor.NewPaymentProcessor(cfg, db, rdb, producer, gateWays)
 	for {
 		msg, err := consumer.ReadMessage(-1)
-		log.Printf("Message on %s: %s\n", msg.TopicPartition, string(msg.Value))
+
 		if err != nil {
 			var kafkaError kafka.Error
 			if errors.As(err, &kafkaError) && kafkaError.Code() == kafka.ErrTimedOut {
@@ -48,6 +48,7 @@ func main() {
 			log.Printf("Error reading message from Kafka topic %s: %v", cfg.KafkaTopics.TransactionTopic, err)
 			continue
 		}
+		log.Printf("Message on %s: %s\n", msg.TopicPartition, string(msg.Value))
 		var transaction models.Transaction
 		err = json.Unmarshal(msg.Value, &transaction)
 		if err != nil {

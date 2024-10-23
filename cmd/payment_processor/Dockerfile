@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -o payment_processor ./cmd/payment_processor
+RUN go build -o payment_service ./cmd/payment_processor
 
 FROM debian:bullseye-slim
 
@@ -17,8 +17,8 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
     ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/payment_processor /app/payment_processor
+COPY --from=builder /app/payment_service /app/payment_service
 
-CMD ["/app/payment_processor"]
+CMD ["/app/payment_service"]
 
 
