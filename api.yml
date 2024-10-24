@@ -18,7 +18,7 @@ paths:
               properties:
                 gate_way:
                   type: string
-                  description: The gateway for the user (e.g., "gateway_a", "gateway_b").
+                  description: The gateway for the user. Current supported gateways are "a" and "b"
                 account_id:
                   type: string
                   description: The account ID for the user.
@@ -78,6 +78,9 @@ paths:
                 currency:
                   type: string
                   description: The currency of the amount.
+                callback:
+                  type: string
+                  description: Endpoint to be called on transaction completed.
               required:
                 - user_guid
                 - amount
@@ -149,6 +152,9 @@ paths:
                 currency:
                   type: string
                   description: The currency of the amount.
+                callback:
+                  type: string
+                  description: Endpoint to be called on transaction completed.
               required:
                 - user_guid
                 - amount

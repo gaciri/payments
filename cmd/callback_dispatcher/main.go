@@ -48,7 +48,7 @@ func main() {
 		}
 		domain, err := utils.ExtractDomain(callbackPayload.ClientCallback)
 		if err != nil {
-			log.Printf("Error extracting domain: %v", err)
+			log.Printf("Error extracting domain: %v : %v", callbackPayload.ClientCallback, err)
 			continue
 		}
 		// set up circuit breaker to client domain
