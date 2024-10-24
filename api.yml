@@ -1,0 +1,250 @@
+openapi: 3.0.0
+info:
+  title: Payment API
+  description: API for handling payments, deposits, withdrawals, and callbacks.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /register:
+    post:
+      summary: Register a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gate_way:
+                  type: string
+                  description: The gateway for the user (e.g., "gateway_a", "gateway_b").
+                account_id:
+                  type: string
+                  description: The account ID for the user.
+              required:
+                - gate_way
+                - account_id
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_guid:
+                    type: string
+                  gate_way:
+                    type: string
+                  account_id:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /deposit:
+    post:
+      summary: Deposit money
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_guid:
+                  type: string
+                  description: The GUID of the user making the deposit.
+                amount:
+                  type: number
+                  format: float
+                  description: The amount to deposit.
+                currency:
+                  type: string
+                  description: The currency of the amount.
+              required:
+                - user_guid
+                - amount
+                - currency
+      responses:
+        '202':
+          description: Deposit accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transaction_id:
+                    type: string
+                  amount:
+                    type: number
+                    format: float
+                  currency:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /withdraw:
+    post:
+      summary: Withdraw money
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_guid:
+                  type: string
+                  description: The GUID of the user making the withdrawal.
+                amount:
+                  type: number
+                  format: float
+                  description: The amount to withdraw.
+                currency:
+                  type: string
+                  description: The currency of the amount.
+              required:
+                - user_guid
+                - amount
+                - currency
+      responses:
+        '202':
+          description: Withdrawal accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  amount:
+                    type: number
+                    format: float
+                  currency:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /status/{transaction_id}:
+    get:
+      summary: Check transaction status
+      parameters:
+        - name: transaction_id
+          in: path
+          required: true
+          description: The ID of the transaction to check.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transaction status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transaction_id:
+                    type: string
+                  amount:
+                    type: number
+                    format: float
+                  currency:
+                    type: string
+                  status:
+                    type: string
+                  type:
+                    type: string
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+

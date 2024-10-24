@@ -14,6 +14,7 @@ type PaymentRequest struct {
 	Amount   float64 `json:"amount"`
 	Currency string  `json:"currency"`
 	UserGuid string  `json:"user_guid"`
+	ClientCallback string `json:"client_callback"`
 }
 type PaymentResponse struct {
 	TransactionId string  `json:"transaction_id"`

@@ -1,0 +1,153 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: cmd/api/Dockerfile
+    container_name: api
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    environment:
+      - PG_HOST=postgres:5432
+      - PG_USER=exinity
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_DATABASE=exinity_payments
+      - REDIS_HOST=redis:6379
+      - KAFKA_SERVER=kafka:9092
+      - TRANSACTION_TOPIC=pay.transaction
+      - CALLBACK_TOPIC=pay.callbacks
+      - DISPATCHER_TOPIC=pay.dispatcher
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+
+  payment_processor:
+    build:
+      context: .
+      dockerfile: cmd/payment_processor/Dockerfile
+    container_name: payment_processor
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    environment:
+      - PG_HOST=postgres:5432
+      - PG_USER=exinity
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_DATABASE=exinity_payments
+      - REDIS_HOST=redis:6379
+      - KAFKA_SERVER=kafka:9092
+      - API_CALLBACK_PREFIX=http://api:8080/callback
+      - GATEWAY_A_URL=http://a.gateway.com
+      - GATEWAY_B_URL=http://b.gateway.com
+      - TRANSACTION_TOPIC=pay.transaction
+      - CALLBACK_TOPIC=pay.callbacks
+      - DISPATCHER_TOPIC=pay.dispatcher
+    networks:
+      - backend
+
+  callback_processor:
+    build:
+      context: .
+      dockerfile: cmd/callback_processor/Dockerfile
+    container_name: callback_processor
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    environment:
+      - PG_HOST=postgres:5432
+      - PG_USER=exinity
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_DATABASE=exinity_payments
+      - REDIS_HOST=redis:6379
+      - KAFKA_SERVER=kafka:9092
+      - API_CALLBACK_PREFIX=http://api:8080/callback
+      - GATEWAY_A_URL=http://a.gateway.com
+      - GATEWAY_B_URL=http://b.gateway.com
+      - TRANSACTION_TOPIC=pay.transaction
+      - CALLBACK_TOPIC=pay.callbacks
+      - DISPATCHER_TOPIC=pay.dispatcher
+    networks:
+      - backend
+  callback_dispatcher:
+    build:
+      context: .
+      dockerfile: cmd/callback_dispatcher/Dockerfile
+    container_name: callback_dispatcher
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    environment:
+      - PG_HOST=postgres:5432
+      - PG_USER=exinity
+      - PG_PASSWORD=${PG_PASSWORD}
+      - PG_DATABASE=exinity_payments
+      - REDIS_HOST=redis:6379
+      - KAFKA_SERVER=kafka:9092
+      - API_CALLBACK_PREFIX=http://api:8080/callback
+      - GATEWAY_A_URL=http://a.gateway.com
+      - GATEWAY_B_URL=http://b.gateway.com
+      - TRANSACTION_TOPIC=pay.transaction
+      - CALLBACK_TOPIC=pay.callbacks
+      - DISPATCHER_TOPIC=pay.dispatcher
+    networks:
+      - backend
+
+  # PostgreSQL
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=exinity
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=exinity_payments
+    networks:
+      - backend
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/schema:/docker-entrypoint-initdb.d
+
+  # Redis
+  redis:
+    image: redis:alpine
+    container_name: redis
+    networks:
+      - backend
+
+  # Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - backend
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -o api ./cmd/api
+RUN go build -o api_service ./cmd/api
 
 FROM debian:bullseye-slim
 
@@ -17,8 +17,7 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
     ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/api /app/api
-
-CMD ["/app/api"]
+COPY --from=builder /app/api_service /app/api_service
+CMD ["/app/api_service"]
 
 

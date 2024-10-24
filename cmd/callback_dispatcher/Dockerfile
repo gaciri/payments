@@ -9,7 +9,7 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -o callback_service ./cmd/callback_processor
+RUN go build -o dispatcher_service ./cmd/callback_dispatcher
 
 FROM debian:bullseye-slim
 
@@ -17,7 +17,7 @@ RUN set -x && apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -
     ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/callback_service /app/callback_service
-CMD ["/app/callback_service"]
+COPY --from=builder /app/dispatcher_service /app/dispatcher_service
+CMD ["/app/dispatcher_service"]
 
 

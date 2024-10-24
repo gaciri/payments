@@ -25,6 +25,7 @@ type Transaction struct {
 	Type          string   `json:"type"`
 	GateWay       string   `json:"gate_way"`
 	UserId        string   `json:"user_id"`
+	ClientCallback string `json:"client_callback"`
 	Amount        float64  `json:"amount"`
 	Currency      string   `json:"currency"`
 	CreatedAt     string   `json:"created_at"`

@@ -18,6 +18,7 @@ CREATE TABLE pay.transactions (
       gate_way VARCHAR(50) NOT NULL,
       account_id VARCHAR(50) NOT NULL,
       user_id VARCHAR(255) NOT NULL,
+      client_callback VARCHAR(255),
       amount DECIMAL(15, 2) NOT NULL,
       currency VARCHAR(10) NOT NULL,
       created_at TIMESTAMPTZ NOT NULL,
