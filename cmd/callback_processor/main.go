@@ -25,17 +25,17 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	/*producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": cfg.Kafka.Server})
+	producer, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": cfg.Kafka.Server})
 	if err != nil {
 		panic(err)
-	}*/
+	}
 	db := utils.NewDbConnection(cfg)
 	rdb := utils.NewRedisConnection(cfg)
 	gateWays := map[string]gateways.PaymentGateway{
 		"a": gateways.NewGateWayA(cfg.Network.GateWayAUrl, "/withdraw", "/deposit", cfg.Network.CallbackPrefix),
 		"b": gateways.NewGateWayB(cfg.Network.GateWayBUrl, cfg.Network.CallbackPrefix),
 	}
-	processor := callback_processor.NewCallbackProcessor(cfg, db, rdb, gateWays)
+	processor := callback_processor.NewCallbackProcessor(cfg, db, rdb, producer, gateWays)
 	for {
 		msg, err := consumer.ReadMessage(-1)
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-pg/pg/v10"
 	"github.com/google/uuid"
+	log2 "github.com/rs/zerolog/log"
 	"io"
 	"log"
 	"net/http"
@@ -17,16 +18,18 @@ import (
 )
 
 type Handler struct {
-	cfg      *config.Config
-	producer *kafka.Producer
-	dbConn   *pg.DB
+	cfg               *config.Config
+	producer          *kafka.Producer
+	dbConn            *pg.DB
+	availableGateways map[string]bool
 }
 
-func NewHandler(cfg *config.Config, producer *kafka.Producer, db *pg.DB) *Handler {
+func NewHandler(cfg *config.Config, producer *kafka.Producer, db *pg.DB, availableGateways map[string]bool) *Handler {
 	return &Handler{
-		cfg:      cfg,
-		producer: producer,
-		dbConn:   db,
+		cfg:               cfg,
+		producer:          producer,
+		dbConn:            db,
+		availableGateways: availableGateways,
 	}
 }
 
@@ -36,6 +39,11 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&registerReq)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	_, ok := h.availableGateways[registerReq.GateWay]
+	if !ok {
+		http.Error(w, "gateway not supported", http.StatusBadRequest)
 		return
 	}
 	userGuid := uuid.NewString()
@@ -110,6 +118,7 @@ func (h *Handler) Deposit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.producer.Flush(config.FlushTimeout)
+	log2.Info().Str("event", "deposit").Str("transaction_id", transaction.TransactionId).Float64("amount", payRequest.Amount).Str("account", utils.MaskString(transaction.AccountId)).Msg("Transaction received")
 	resp := PaymentResponse{
 		TransactionId: transaction.TransactionId,
 		Amount:        transaction.Amount,

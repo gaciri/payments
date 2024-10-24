@@ -6,6 +6,7 @@ type Config struct {
 	KafkaTopics struct {
 		TransactionTopic string `envconfig:"TRANSACTION_TOPIC"`
 		CallbackTopic    string `envconfig:"CALLBACK_TOPIC"`
+		DispatcherTopic  string `envconfig:"DISPATCHER_TOPIC"`
 	}
 	Kafka struct {
 		Server string `envconfig:"KAFKA_SERVER"`

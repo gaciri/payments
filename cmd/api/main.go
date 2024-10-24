@@ -25,7 +25,8 @@ func main() {
 	}
 	defer producer.Close()
 	dbConn := utils.NewDbConnection(cfg)
-	handler := api.NewHandler(cfg, producer, dbConn)
+	availableGateways := map[string]bool{"a": true, "b": true}
+	handler := api.NewHandler(cfg, producer, dbConn, availableGateways)
 	router.Post("/register", handler.Register)
 	router.Post("/deposit", handler.Deposit)
 	router.Post("/withdraw", handler.Withdraw)
